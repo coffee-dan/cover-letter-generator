@@ -7,8 +7,8 @@
 		<title>Cover Letter Generator</title>
 	</head>
 	<body id="body">
-		<main class="page">
-			<h1>Typescript Cover Letter Generator</h1>
+		<main id="page" class="page">
+			<h1>Cover Letter Generator</h1>
 
 			<div class="columns">
 				<form id="cover_letter" class="cover_letter">
@@ -20,8 +20,8 @@
 					<textarea class="form_element" id="info" name="info" placeholder="Personal Info"></textarea>
 					<br />
 	
-					<label for="p1">Body:</label><br />
-					<textarea class="form_element" id="p1" name="p1" placeholder="Body (intro, middle, conclusion, complimentary paragraphs)"></textarea>
+					<label for="letter_body">Body:</label><br />
+					<textarea class="form_element" id="letter_body" name="letter_body" placeholder="Body (intro, middle, conclusion, complimentary paragraphs)"></textarea>
 					<br />
 	
 					<label for="sign">Signature:</label><br />
@@ -36,6 +36,8 @@
 					
 				</form>
 			</div>
+
+			<div id="letter"></div>
 			
 		</main>
 		<script src="public/js/index.js"></script>

@@ -33,9 +33,9 @@ coverLetter.addEventListener('submit', (event: Event) => {
 	substitutionsFormIDList = [];
 	placeholdersList = [];
 
-	coverLetterItems.push('#' + nameElement.value);
-	coverLetterItems.push(info.value + getDate());
-	coverLetterItems.push(letterBody.value);
+	coverLetterItems.push('# ' + nameElement.value);
+	coverLetterItems.push(info.value + '\n\n' + getDate() + '\n');
+	coverLetterItems.push(letterBody.value + '\n');
 	coverLetterItems.push(signature.value);
 
 	placeholdersList = findPlaceholders(coverLetterItems);
@@ -90,6 +90,7 @@ function getDate(): string {
 	return month + ' ' + dd + ', ' + yyyy;
 }
 
+// check if form is empty
 function isFormEmpty(idList: string[]): boolean {
 	let isEmpty = false;
 	idList.forEach(id => {
@@ -148,6 +149,7 @@ function fillPlaceholders(
 	textItems: string[],
 	dict: placeholderDictionary
 ): string[] {
+	console.log('filling placeholders...');
 	let newTextItems: string[] = [];
 
 	textItems.forEach(text => {
@@ -162,16 +164,54 @@ function fillPlaceholders(
 	const letter: HTMLElement | any = document.getElementById('letter');
 	letter.innerHTML = '';
 
-	const paragraphs: string[] = [];
+	let paragraphs: string[] = [];
 
 	newTextItems.map(text => {
-		paragraphs.concat(text.split(/\n\n/));
+		paragraphs = paragraphs.concat(text.split(/\n\n/));
 	});
 
 	paragraphs.forEach(pText => {
-		if (pText != '') {
+		pText = pText.replace('\n', '<br>');
+
+		if (pText.match(/# .*/)) {
+			pText = pText.substring(2);
+			letter.innerHTML += `<h1>${pText}</h1>`;
+		} else if (pText != '') {
 			letter.innerHTML += `<p>${pText}</p>`;
 		}
 	});
+
+	console.log('paragraphs', paragraphs);
 	return newTextItems;
 }
+
+function downloadAsTextFile(filename: string, text: string): void {
+	let element = document.createElement('a');
+	element.setAttribute(
+		'href',
+		'data:text/plain;charset=utf-8,' + encodeURIComponent(text)
+	);
+	element.setAttribute('download', filename);
+
+	element.style.display = 'none';
+	document.body.appendChild(element);
+
+	element.click();
+
+	document.body.removeChild(element);
+}
+
+let dwnBtn: HTMLElement | any = document.getElementById('download-button');
+dwnBtn.addEventListener(
+	'click',
+	() => {
+		let text: string = '';
+		coverLetterItems.forEach(item => {
+			text += item + '\n';
+		});
+		const filename = 'output.txt';
+
+		downloadAsTextFile(filename, text);
+	},
+	false
+);

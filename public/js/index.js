@@ -20,9 +20,9 @@ coverLetter.addEventListener('submit', function (event) {
     coverLetterItems = [];
     substitutionsFormIDList = [];
     placeholdersList = [];
-    coverLetterItems.push('#' + nameElement.value);
-    coverLetterItems.push(info.value + getDate());
-    coverLetterItems.push(letterBody.value);
+    coverLetterItems.push('# ' + nameElement.value);
+    coverLetterItems.push(info.value + '\n\n' + getDate() + '\n');
+    coverLetterItems.push(letterBody.value + '\n');
     coverLetterItems.push(signature.value);
     placeholdersList = findPlaceholders(coverLetterItems);
     // save list of IDs for substitutions form for later
@@ -65,6 +65,7 @@ function getDate() {
     var yyyy = today.getFullYear();
     return month + ' ' + dd + ', ' + yyyy;
 }
+// check if form is empty
 function isFormEmpty(idList) {
     var isEmpty = false;
     idList.forEach(function (id) {
@@ -107,6 +108,7 @@ function findPlaceholders(textItems) {
     return uniquePlaceholders;
 }
 function fillPlaceholders(textItems, dict) {
+    console.log('filling placeholders...');
     var newTextItems = [];
     textItems.forEach(function (text) {
         var newText = text;
@@ -119,12 +121,36 @@ function fillPlaceholders(textItems, dict) {
     letter.innerHTML = '';
     var paragraphs = [];
     newTextItems.map(function (text) {
-        paragraphs.concat(text.split(/\n\n/));
+        paragraphs = paragraphs.concat(text.split(/\n\n/));
     });
     paragraphs.forEach(function (pText) {
-        if (pText != '') {
+        pText = pText.replace('\n', '<br>');
+        if (pText.match(/# .*/)) {
+            pText = pText.substring(2);
+            letter.innerHTML += "<h1>" + pText + "</h1>";
+        }
+        else if (pText != '') {
             letter.innerHTML += "<p>" + pText + "</p>";
         }
     });
+    console.log('paragraphs', paragraphs);
     return newTextItems;
 }
+function downloadAsTextFile(filename, text) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+}
+var dwnBtn = document.getElementById('download-button');
+dwnBtn.addEventListener('click', function () {
+    var text = '';
+    coverLetterItems.forEach(function (item) {
+        text += item + '\n';
+    });
+    var filename = 'output.txt';
+    downloadAsTextFile(filename, text);
+}, false);

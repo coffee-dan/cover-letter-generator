@@ -17,8 +17,6 @@ const coverLetterIDList: string[] = ['name', 'info', 'letter_body', 'sign'];
 let coverLetterItems: string[] = [];
 let substitutionsFormIDList: string[] = [];
 let placeholdersList: string[] = [];
-let substitutionsDict: placeholderDictionary = {};
-let letterText: string = '';
 
 // COVER LETTER SUBMIT
 coverLetter.addEventListener('submit', (event: Event) => {
@@ -26,47 +24,23 @@ coverLetter.addEventListener('submit', (event: Event) => {
 	event.preventDefault();
 
 	console.log('Cover Letter Text Submitted!');
-	const isFilled: boolean = isFormFilled(coverLetterIDList);
-	console.log('isFormFilled(coverLetterIDList)', isFilled);
 
-	if (!isFilled) {
+	if (isFormEmpty(coverLetterIDList)) {
 		return;
 	}
 
 	coverLetterItems = [];
 	substitutionsFormIDList = [];
 	placeholdersList = [];
-	substitutionsDict = {};
-	letterText = '';
 
 	coverLetterItems.push('#' + nameElement.value);
 	coverLetterItems.push(info.value + getDate());
 	coverLetterItems.push(letterBody.value);
 	coverLetterItems.push(signature.value);
 
-	const text =
-		'#' +
-		nameElement.value +
-		'\n\n' +
-		info.value +
-		'\n\n' +
-		getDate() +
-		'\n\n' +
-		letterBody.value +
-		'\n\n' +
-		signature.value;
-
-	letterText = text;
-	console.log('text', text);
-
 	placeholdersList = findPlaceholders(coverLetterItems);
-	console.log('findPlaceholders(text)', placeholdersList);
 	// save list of IDs for substitutions form for later
 	substitutionsFormIDList = generateSubstitutionsForm(placeholdersList);
-	console.log(
-		'generateSubstitutionsForm(placeholdersList)',
-		substitutionsFormIDList
-	);
 });
 
 // SUBSTITUTIONS SUBMIT
@@ -75,10 +49,8 @@ substitutionsForm.addEventListener('submit', (event: Event) => {
 	event.preventDefault();
 
 	console.log('Substitutions form submitted!');
-	const isFilled: boolean = isFormFilled(substitutionsFormIDList);
-	console.log('isFormFilled(substitutionsFormIDList)', isFilled);
 
-	if (!isFilled) {
+	if (isFormEmpty(substitutionsFormIDList)) {
 		return;
 	}
 
@@ -90,9 +62,7 @@ substitutionsForm.addEventListener('submit', (event: Event) => {
 		dict[placeholdersList[i]] = formItem.value;
 	}
 
-	substitutionsDict = dict;
-	console.log('placeholderDict', dict);
-	fillPlaceholders(coverLetterItems, substitutionsDict);
+	coverLetterItems = fillPlaceholders(coverLetterItems, dict);
 });
 
 // retrieve formatted date string Month dd, yyyy
@@ -120,14 +90,14 @@ function getDate(): string {
 	return month + ' ' + dd + ', ' + yyyy;
 }
 
-function isFormFilled(idList: string[]): boolean {
-	let isFilled = true;
+function isFormEmpty(idList: string[]): boolean {
+	let isEmpty = false;
 	idList.forEach(id => {
 		const formItem: HTMLElement | any = document.getElementById(id);
-		isFilled = isFilled && formItem.value != '';
+		isEmpty = isEmpty && formItem.value == '';
 	});
 
-	return isFilled;
+	return isEmpty;
 }
 
 function generateSubstitutionsForm(placeholders: string[]): string[] {
@@ -157,12 +127,10 @@ function generateSubstitutionsForm(placeholders: string[]): string[] {
 // Find placeholders of format [placeholder]
 function findPlaceholders(textItems: string[]): string[] {
 	const phRegex: RegExp = new RegExp(/\[[^[]*\]/g);
-	// const placeholders: string[] = text.match(phRegex) || [];
 	let placeholders: string[] = [];
 	textItems.forEach(text => {
 		const newList: string[] = text.match(phRegex) || [];
 		placeholders = placeholders.concat(newList);
-		console.log('placeholders', newList, placeholders);
 	});
 
 	// remove duplicates
@@ -191,8 +159,6 @@ function fillPlaceholders(
 		newTextItems.push(newText);
 	});
 
-	console.log(newTextItems);
-
 	const letter: HTMLElement | any = document.getElementById('letter');
 	letter.innerHTML = '';
 
@@ -202,8 +168,6 @@ function fillPlaceholders(
 		paragraphs.concat(text.split(/\n\n/));
 	});
 
-	console.log('paragraphs', paragraphs);
-	console.log(paragraphs);
 	paragraphs.forEach(pText => {
 		if (pText != '') {
 			letter.innerHTML += `<p>${pText}</p>`;

@@ -9,53 +9,31 @@ var coverLetterIDList = ['name', 'info', 'letter_body', 'sign'];
 var coverLetterItems = [];
 var substitutionsFormIDList = [];
 var placeholdersList = [];
-var substitutionsDict = {};
-var letterText = '';
 // COVER LETTER SUBMIT
 coverLetter.addEventListener('submit', function (event) {
     // prevent the default behavior of the submit button
     event.preventDefault();
     console.log('Cover Letter Text Submitted!');
-    var isFilled = isFormFilled(coverLetterIDList);
-    console.log('isFormFilled(coverLetterIDList)', isFilled);
-    if (!isFilled) {
+    if (isFormEmpty(coverLetterIDList)) {
         return;
     }
     coverLetterItems = [];
     substitutionsFormIDList = [];
     placeholdersList = [];
-    substitutionsDict = {};
-    letterText = '';
     coverLetterItems.push('#' + nameElement.value);
     coverLetterItems.push(info.value + getDate());
     coverLetterItems.push(letterBody.value);
     coverLetterItems.push(signature.value);
-    var text = '#' +
-        nameElement.value +
-        '\n\n' +
-        info.value +
-        '\n\n' +
-        getDate() +
-        '\n\n' +
-        letterBody.value +
-        '\n\n' +
-        signature.value;
-    letterText = text;
-    console.log('text', text);
     placeholdersList = findPlaceholders(coverLetterItems);
-    console.log('findPlaceholders(text)', placeholdersList);
     // save list of IDs for substitutions form for later
     substitutionsFormIDList = generateSubstitutionsForm(placeholdersList);
-    console.log('generateSubstitutionsForm(placeholdersList)', substitutionsFormIDList);
 });
 // SUBSTITUTIONS SUBMIT
 substitutionsForm.addEventListener('submit', function (event) {
     // prevent the default behavior of the submit button
     event.preventDefault();
     console.log('Substitutions form submitted!');
-    var isFilled = isFormFilled(substitutionsFormIDList);
-    console.log('isFormFilled(substitutionsFormIDList)', isFilled);
-    if (!isFilled) {
+    if (isFormEmpty(substitutionsFormIDList)) {
         return;
     }
     var dict = {};
@@ -63,9 +41,7 @@ substitutionsForm.addEventListener('submit', function (event) {
         var formItem = document.getElementById(substitutionsFormIDList[i]);
         dict[placeholdersList[i]] = formItem.value;
     }
-    substitutionsDict = dict;
-    console.log('placeholderDict', dict);
-    fillPlaceholders(coverLetterItems, substitutionsDict);
+    coverLetterItems = fillPlaceholders(coverLetterItems, dict);
 });
 // retrieve formatted date string Month dd, yyyy
 function getDate() {
@@ -89,13 +65,13 @@ function getDate() {
     var yyyy = today.getFullYear();
     return month + ' ' + dd + ', ' + yyyy;
 }
-function isFormFilled(idList) {
-    var isFilled = true;
+function isFormEmpty(idList) {
+    var isEmpty = false;
     idList.forEach(function (id) {
         var formItem = document.getElementById(id);
-        isFilled = isFilled && formItem.value != '';
+        isEmpty = isEmpty && formItem.value == '';
     });
-    return isFilled;
+    return isEmpty;
 }
 function generateSubstitutionsForm(placeholders) {
     if (placeholders.length <= 0) {
@@ -116,12 +92,10 @@ function generateSubstitutionsForm(placeholders) {
 // Find placeholders of format [placeholder]
 function findPlaceholders(textItems) {
     var phRegex = new RegExp(/\[[^[]*\]/g);
-    // const placeholders: string[] = text.match(phRegex) || [];
     var placeholders = [];
     textItems.forEach(function (text) {
         var newList = text.match(phRegex) || [];
         placeholders = placeholders.concat(newList);
-        console.log('placeholders', newList, placeholders);
     });
     // remove duplicates
     var uniquePlaceholders = [];
@@ -141,15 +115,12 @@ function fillPlaceholders(textItems, dict) {
         });
         newTextItems.push(newText);
     });
-    console.log(newTextItems);
     var letter = document.getElementById('letter');
     letter.innerHTML = '';
     var paragraphs = [];
     newTextItems.map(function (text) {
         paragraphs.concat(text.split(/\n\n/));
     });
-    console.log('paragraphs', paragraphs);
-    console.log(paragraphs);
     paragraphs.forEach(function (pText) {
         if (pText != '') {
             letter.innerHTML += "<p>" + pText + "</p>";

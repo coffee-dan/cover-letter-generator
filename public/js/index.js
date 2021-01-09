@@ -6,10 +6,11 @@ var letterBody = document.getElementById('letter_body');
 var signature = document.getElementById('sign');
 var substitutionsForm = document.getElementById('substitutions');
 var coverLetterIDList = ['name', 'info', 'letter_body', 'sign'];
-var substitutionsFormIDList;
-var placeholdersList;
-var substitutionsDict;
-var letterText;
+var coverLetterItems = [];
+var substitutionsFormIDList = [];
+var placeholdersList = [];
+var substitutionsDict = {};
+var letterText = '';
 // COVER LETTER SUBMIT
 coverLetter.addEventListener('submit', function (event) {
     // prevent the default behavior of the submit button
@@ -20,10 +21,28 @@ coverLetter.addEventListener('submit', function (event) {
     if (!isFilled) {
         return;
     }
-    var text = nameElement.value + info.value + letterBody.value + signature.value;
+    coverLetterItems = [];
+    substitutionsFormIDList = [];
+    placeholdersList = [];
+    substitutionsDict = {};
+    letterText = '';
+    coverLetterItems.push('#' + nameElement.value);
+    coverLetterItems.push(info.value + getDate());
+    coverLetterItems.push(letterBody.value);
+    coverLetterItems.push(signature.value);
+    var text = '#' +
+        nameElement.value +
+        '\n\n' +
+        info.value +
+        '\n\n' +
+        getDate() +
+        '\n\n' +
+        letterBody.value +
+        '\n\n' +
+        signature.value;
     letterText = text;
     console.log('text', text);
-    placeholdersList = findPlaceholders(text);
+    placeholdersList = findPlaceholders(coverLetterItems);
     console.log('findPlaceholders(text)', placeholdersList);
     // save list of IDs for substitutions form for later
     substitutionsFormIDList = generateSubstitutionsForm(placeholdersList);
@@ -46,8 +65,30 @@ substitutionsForm.addEventListener('submit', function (event) {
     }
     substitutionsDict = dict;
     console.log('placeholderDict', dict);
-    fillPlaceholders(letterText, substitutionsDict);
+    fillPlaceholders(coverLetterItems, substitutionsDict);
 });
+// retrieve formatted date string Month dd, yyyy
+function getDate() {
+    var today = new Date();
+    var MONTHS = {
+        '0': 'January',
+        '1': 'February',
+        '2': 'March',
+        '3': 'April',
+        '4': 'May',
+        '5': 'June',
+        '6': 'July',
+        '7': 'August',
+        '8': 'September',
+        '9': 'October',
+        '10': 'November',
+        '11': 'December',
+    };
+    var month = MONTHS[String(today.getMonth())]; //January is 0!
+    var dd = String(today.getDate()).padStart(2, '0');
+    var yyyy = today.getFullYear();
+    return month + ' ' + dd + ', ' + yyyy;
+}
 function isFormFilled(idList) {
     var isFilled = true;
     idList.forEach(function (id) {
@@ -73,9 +114,15 @@ function generateSubstitutionsForm(placeholders) {
     return idList;
 }
 // Find placeholders of format [placeholder]
-function findPlaceholders(text) {
+function findPlaceholders(textItems) {
     var phRegex = new RegExp(/\[[^[]*\]/g);
-    var placeholders = text.match(phRegex) || [];
+    // const placeholders: string[] = text.match(phRegex) || [];
+    var placeholders = [];
+    textItems.forEach(function (text) {
+        var newList = text.match(phRegex) || [];
+        placeholders = placeholders.concat(newList);
+        console.log('placeholders', newList, placeholders);
+    });
     // remove duplicates
     var uniquePlaceholders = [];
     placeholders.forEach(function (ph) {
@@ -85,31 +132,28 @@ function findPlaceholders(text) {
     });
     return uniquePlaceholders;
 }
-// // Get replacements for each of the placeholders
-// function getReplacements(placeholders: string[]): placeholderDictionary {
-// 	let dict: placeholderDictionary = {};
-// 	let i;
-// 	for (i = 0; i < placeholders.length; i++) {
-// 		dict[placeholders[i]] = i.toString();
-// 	}
-// 	return dict;
-// }
-function fillPlaceholders(text, dict) {
-    var newText = text;
-    Object.keys(dict).map(function (placeholder) {
-        newText = newText.replaceAll(placeholder, dict[placeholder]);
+function fillPlaceholders(textItems, dict) {
+    var newTextItems = [];
+    textItems.forEach(function (text) {
+        var newText = text;
+        Object.keys(dict).map(function (placeholder) {
+            newText = newText.replaceAll(placeholder, dict[placeholder]);
+        });
+        newTextItems.push(newText);
     });
-    console.log(newText);
-    var page = document.getElementById('page');
-    page.innerHTML += "<div>" + newText + "</div>";
-    return newText;
+    console.log(newTextItems);
+    var letter = document.getElementById('letter');
+    letter.innerHTML = '';
+    var paragraphs = [];
+    newTextItems.map(function (text) {
+        paragraphs.concat(text.split(/\n\n/));
+    });
+    console.log('paragraphs', paragraphs);
+    console.log(paragraphs);
+    paragraphs.forEach(function (pText) {
+        if (pText != '') {
+            letter.innerHTML += "<p>" + pText + "</p>";
+        }
+    });
+    return newTextItems;
 }
-// const text: string =
-// 	"Hello, my name is [name] i'm applying for [job_position] at [company_name]. [job_position] is cool";
-// console.log('wowo');
-// const phList: string[] = findPlaceholders(text);
-// console.log('findPlaceholders(text)', phList);
-// const dict: placeholderDictionary = getReplacements(phList);
-// console.log('getReplacements(phList)', dict);
-// const newText: string = fillPlaceholders(text, dict);
-// console.log('fillPlaceholders(text, dict)', newText);

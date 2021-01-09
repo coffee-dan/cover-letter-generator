@@ -7,15 +7,18 @@ let substitutionsForm: HTMLElement | any = document.getElementById(
 	'substitutions'
 );
 
+// \TODO try adding font swapping
+
 interface placeholderDictionary {
 	[placeholder: string]: string;
 }
 
 const coverLetterIDList: string[] = ['name', 'info', 'letter_body', 'sign'];
-let substitutionsFormIDList: string[];
-let placeholdersList: string[];
-let substitutionsDict: placeholderDictionary;
-let letterText: string;
+let coverLetterItems: string[] = [];
+let substitutionsFormIDList: string[] = [];
+let placeholdersList: string[] = [];
+let substitutionsDict: placeholderDictionary = {};
+let letterText: string = '';
 
 // COVER LETTER SUBMIT
 coverLetter.addEventListener('submit', (event: Event) => {
@@ -30,13 +33,33 @@ coverLetter.addEventListener('submit', (event: Event) => {
 		return;
 	}
 
+	coverLetterItems = [];
+	substitutionsFormIDList = [];
+	placeholdersList = [];
+	substitutionsDict = {};
+	letterText = '';
+
+	coverLetterItems.push('#' + nameElement.value);
+	coverLetterItems.push(info.value + getDate());
+	coverLetterItems.push(letterBody.value);
+	coverLetterItems.push(signature.value);
+
 	const text =
-		nameElement.value + info.value + letterBody.value + signature.value;
+		'#' +
+		nameElement.value +
+		'\n\n' +
+		info.value +
+		'\n\n' +
+		getDate() +
+		'\n\n' +
+		letterBody.value +
+		'\n\n' +
+		signature.value;
 
 	letterText = text;
 	console.log('text', text);
 
-	placeholdersList = findPlaceholders(text);
+	placeholdersList = findPlaceholders(coverLetterItems);
 	console.log('findPlaceholders(text)', placeholdersList);
 	// save list of IDs for substitutions form for later
 	substitutionsFormIDList = generateSubstitutionsForm(placeholdersList);
@@ -69,8 +92,33 @@ substitutionsForm.addEventListener('submit', (event: Event) => {
 
 	substitutionsDict = dict;
 	console.log('placeholderDict', dict);
-	fillPlaceholders(letterText, substitutionsDict);
+	fillPlaceholders(coverLetterItems, substitutionsDict);
 });
+
+// retrieve formatted date string Month dd, yyyy
+function getDate(): string {
+	const today: Date = new Date();
+	const MONTHS: Record<string, string> = {
+		'0': 'January',
+		'1': 'February',
+		'2': 'March',
+		'3': 'April',
+		'4': 'May',
+		'5': 'June',
+		'6': 'July',
+		'7': 'August',
+		'8': 'September',
+		'9': 'October',
+		'10': 'November',
+		'11': 'December',
+	};
+
+	const month: string = MONTHS[String(today.getMonth())]; //January is 0!
+	const dd = String(today.getDate()).padStart(2, '0');
+	const yyyy = today.getFullYear();
+
+	return month + ' ' + dd + ', ' + yyyy;
+}
 
 function isFormFilled(idList: string[]): boolean {
 	let isFilled = true;
@@ -107,9 +155,15 @@ function generateSubstitutionsForm(placeholders: string[]): string[] {
 }
 
 // Find placeholders of format [placeholder]
-function findPlaceholders(text: string): string[] {
+function findPlaceholders(textItems: string[]): string[] {
 	const phRegex: RegExp = new RegExp(/\[[^[]*\]/g);
-	const placeholders: string[] = text.match(phRegex) || [];
+	// const placeholders: string[] = text.match(phRegex) || [];
+	let placeholders: string[] = [];
+	textItems.forEach(text => {
+		const newList: string[] = text.match(phRegex) || [];
+		placeholders = placeholders.concat(newList);
+		console.log('placeholders', newList, placeholders);
+	});
 
 	// remove duplicates
 	let uniquePlaceholders: string[] = [];
@@ -122,40 +176,38 @@ function findPlaceholders(text: string): string[] {
 	return uniquePlaceholders;
 }
 
-// // Get replacements for each of the placeholders
-// function getReplacements(placeholders: string[]): placeholderDictionary {
-// 	let dict: placeholderDictionary = {};
-// 	let i;
-// 	for (i = 0; i < placeholders.length; i++) {
-// 		dict[placeholders[i]] = i.toString();
-// 	}
+function fillPlaceholders(
+	textItems: string[],
+	dict: placeholderDictionary
+): string[] {
+	let newTextItems: string[] = [];
 
-// 	return dict;
-// }
+	textItems.forEach(text => {
+		let newText: string = text;
+		Object.keys(dict).map(placeholder => {
+			newText = newText.replaceAll(placeholder, dict[placeholder]);
+		});
 
-function fillPlaceholders(text: string, dict: placeholderDictionary): string {
-	let newText: string = text;
-
-	Object.keys(dict).map(placeholder => {
-		newText = newText.replaceAll(placeholder, dict[placeholder]);
+		newTextItems.push(newText);
 	});
 
-	console.log(newText);
+	console.log(newTextItems);
 
-	const page: HTMLElement | any = document.getElementById('page');
-	page.innerHTML += `<div>${newText}</div>`;
-	return newText;
+	const letter: HTMLElement | any = document.getElementById('letter');
+	letter.innerHTML = '';
+
+	const paragraphs: string[] = [];
+
+	newTextItems.map(text => {
+		paragraphs.concat(text.split(/\n\n/));
+	});
+
+	console.log('paragraphs', paragraphs);
+	console.log(paragraphs);
+	paragraphs.forEach(pText => {
+		if (pText != '') {
+			letter.innerHTML += `<p>${pText}</p>`;
+		}
+	});
+	return newTextItems;
 }
-
-// const text: string =
-// 	"Hello, my name is [name] i'm applying for [job_position] at [company_name]. [job_position] is cool";
-
-// console.log('wowo');
-// const phList: string[] = findPlaceholders(text);
-// console.log('findPlaceholders(text)', phList);
-
-// const dict: placeholderDictionary = getReplacements(phList);
-// console.log('getReplacements(phList)', dict);
-
-// const newText: string = fillPlaceholders(text, dict);
-// console.log('fillPlaceholders(text, dict)', newText);

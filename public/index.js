@@ -87,7 +87,7 @@ function generateSubstitutionsForm(placeholders) {
         substitutionsForm.innerHTML += "<label for=\"name\">" + placeholders[i] + ":</label><br />\n\t\t<input class=\"form_element\" type=\"text\" id=\"placeholder" + i + "\" name=\"placeholder" + i + "\" placeholder=\"Text to replace " + placeholders[i] + "\" />\n\t\t<br />";
         idList.push("placeholder" + i);
     }
-    substitutionsForm.innerHTML += "<input type=\"submit\" value=\"Generate Cover Letter\">";
+    substitutionsForm.innerHTML += "<input type=\"submit\" value=\"Generate preview\">";
     return idList;
 }
 // Find placeholders of format [placeholder]

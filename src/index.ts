@@ -120,7 +120,7 @@ function generateSubstitutionsForm(placeholders: string[]): string[] {
 		idList.push(`placeholder${i}`);
 	}
 
-	substitutionsForm.innerHTML += `<input type="submit" value="Generate Cover Letter">`;
+	substitutionsForm.innerHTML += `<input type="submit" value="Generate preview">`;
 
 	return idList;
 }

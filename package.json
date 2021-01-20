@@ -4,8 +4,9 @@
   "description": "Cover letter template toolkit",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w"
+    "build": "tsc && sass",
+    "type-watch": "tsc -w",
+    "sass-watch": "sass --watch src/sass:public/css"
   },
   "author": "Daniel Ramirez",
   "license": "0BSD",

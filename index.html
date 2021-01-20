@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="public/style.css" />
+		<link rel="stylesheet" href="public/css/index.css" />
 		<title>Cover Letter Generator</title>
 	</head>
 	<body id="body">
@@ -11,7 +11,7 @@
 			<h1>Cover Letter Generator</h1>
 
 			<div class="columns">
-				<form id="cover_letter" class="cover_letter" method="POST">
+				<form id="cover_letter" class="cover_letter card" method="POST">
 					<label for="name">Full name:</label><br />
 					<input class="form_element" type="text" id="name" name="name" placeholder="Full name" value="Testing Tim" />
 					<br />
@@ -28,20 +28,20 @@
 					<textarea class="form_element" id="sign" name="sign" placeholder="Signature"></textarea>
 					<br />
 	
-					<input type="submit" value="Next Step" accesskey="enter">
+					<input type="submit" value="Detect Placeholders" accesskey="enter">
 	
 				</form method="POST">
 	
-				<form id="substitutions" class="cover_letter">
+				<form id="substitutions" class="cover_letter card">
 					
 				</form>
 			</div>
 
-			<div id="letter"></div>
+			<div id="letter" class="card"></div>
 
-			<input type="button" id="download-button" value="Cover Letter File" />
+			<input type="button" id="download-button" value="Download .txt file" />
 			
 		</main>
-		<script src="public/js/index.js"></script>
+		<script src="public/index.js"></script>
 	</body>
 </html>
